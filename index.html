@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apartment Valet: Car Parking Simulator 2D</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Top Navigation / HUD Header -->
+    <header id="top-bar">
+      <div class="logo">
+        <span class="icon">🏢🚗</span>
+        <span class="title">APARTMENT PARKING 2D</span>
+      </div>
+
+      <div class="hud-stats">
+        <div class="stat-box">
+          <span class="label">LEVEL</span>
+          <span id="level-display" class="value">1 / 5</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="label">TIME</span>
+          <span id="timer-display" class="value">00:00</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="label">HEALTH</span>
+          <div class="health-bar-container">
+            <div id="health-bar" class="health-bar-fill" style="width: 100%;"></div>
+          </div>
+          <span id="health-text" class="value-sm">100%</span>
+        </div>
+
+        <div class="stat-box">
+          <span class="label">GEAR</span>
+          <span id="gear-display" class="value gear-d">D</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button id="btn-sound" class="btn-icon" title="Toggle Sound">🔊</button>
+        <button id="btn-restart-top" class="btn-icon" title="Restart Level">🔄</button>
+        <button id="btn-menu" class="btn-secondary">Menu</button>
+      </div>
+    </header>
+
+    <!-- Main Game Viewport -->
+    <main id="game-viewport">
+      <canvas id="gameCanvas" width="1000" height="650"></canvas>
+
+      <!-- Parking Guide Alert Overlay -->
+      <div id="parking-guide" class="parking-guide-popup hidden">
+        <span class="guide-icon">🅿️</span>
+        <span id="guide-text">Align car inside yellow parking lines & stop!</span>
+      </div>
+
+      <!-- Touch / On-screen Controls Overlay -->
+      <div id="touch-controls">
+        <div class="control-group left-group">
+          <button id="btn-left" class="control-btn btn-steer">◀</button>
+          <button id="btn-right" class="control-btn btn-steer">▶</button>
+        </div>
+
+        <div class="control-group center-group">
+          <button id="btn-gear-toggle" class="control-btn btn-gear">Gear: <span id="btn-gear-text">DRIVE (D)</span></button>
+        </div>
+
+        <div class="control-group right-group">
+          <button id="btn-brake" class="control-btn btn-pedal pedal-brake">BRAKE</button>
+          <button id="btn-gas" class="control-btn btn-pedal pedal-gas">GAS</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Controls Legend Bar -->
+    <footer id="controls-bar">
+      <div class="control-hint"><span>[W] / [▲]</span> Gas</div>
+      <div class="control-hint"><span>[S] / [▼]</span> Reverse / Brake</div>
+      <div class="control-hint"><span>[A] / [D] / [◄] / [►]</span> Steer</div>
+      <div class="control-hint"><span>[SPACE]</span> Handbrake</div>
+      <div class="control-hint"><span>[R]</span> Switch Gear (Drive / Reverse)</div>
+    </footer>
+  </div>
+
+  <!-- Start / Level Select Modal -->
+  <div id="modal-menu" class="modal-overlay">
+    <div class="modal-card">
+      <h2>🏢 Apartment Parking Challenge</h2>
+      <p class="subtitle">Navigate luxury sports cars through complex apartment garages, avoid pillars, barriers, and parked vehicles to park perfectly!</p>
+
+      <div class="level-select-grid">
+        <button class="level-card" data-level="1">
+          <span class="level-num">Level 1</span>
+          <span class="level-title">Basement Entrance</span>
+          <span class="level-desc">Basic parking bay entrance. Easy.</span>
+          <div class="stars-earned">★★★</div>
+        </button>
+
+        <button class="level-card" data-level="2">
+          <span class="level-num">Level 2</span>
+          <span class="level-title">Pillar Labyrinth</span>
+          <span class="level-desc">Watch out for tight structural pillars!</span>
+          <div class="stars-earned">☆☆☆</div>
+        </button>
+
+        <button class="level-card" data-level="3">
+          <span class="level-num">Level 3</span>
+          <span class="level-title">Courtyard Alley</span>
+          <span class="level-desc">Parallel park between expensive Resident SUVs.</span>
+          <div class="stars-earned">☆☆☆</div>
+        </button>
+
+        <button class="level-card" data-level="4">
+          <span class="level-num">Level 4</span>
+          <span class="level-title">Speed Bump Zone</span>
+          <span class="level-desc">Mind speed bumps and moving security patrols!</span>
+          <div class="stars-earned">☆☆☆</div>
+        </button>
+
+        <button class="level-card" data-level="5">
+          <span class="level-num">Level 5</span>
+          <span class="level-title">Tight VIP Reverse Bay</span>
+          <span class="level-desc">Tightest spot in the underground penthouse floor.</span>
+          <div class="stars-earned">☆☆☆</div>
+        </button>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-start-game" class="btn-primary">Play Level 1</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Level Completed / Victory Modal -->
+  <div id="modal-victory" class="modal-overlay hidden">
+    <div class="modal-card win-card">
+      <div class="win-banner">PARKED PERFECTLY! 🎉</div>
+      <h2 id="victory-title">Level Completed</h2>
+
+      <div class="stars-container" id="victory-stars">
+        <span class="star lit">★</span>
+        <span class="star lit">★</span>
+        <span class="star lit">★</span>
+      </div>
+
+      <div class="stats-summary">
+        <div class="summary-row">
+          <span>Time Taken:</span>
+          <strong id="summary-time">00:24</strong>
+        </div>
+        <div class="summary-row">
+          <span>Vehicle Health:</span>
+          <strong id="summary-health">100%</strong>
+        </div>
+        <div class="summary-row">
+          <span>Parking Accuracy:</span>
+          <strong id="summary-accuracy">98%</strong>
+        </div>
+        <div class="summary-row">
+          <span>Score:</span>
+          <strong id="summary-score">2500 pts</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="btn-replay" class="btn-secondary">Retry Level</button>
+        <button id="btn-next-level" class="btn-primary">Next Level ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Modal -->
+  <div id="modal-gameover" class="modal-overlay hidden">
+    <div class="modal-card fail-card">
+      <div class="fail-banner">💥 VEHICLE CRASHED!</div>
+      <h2>Insurance Claim Required!</h2>
+      <p id="gameover-reason">Your vehicle sustained total damage against the parking pillar.</p>
+
+      <div class="modal-actions">
+        <button id="btn-try-again" class="btn-primary">Try Again 🔄</button>
+        <button id="btn-fail-menu" class="btn-secondary">Level Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
