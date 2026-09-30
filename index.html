@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grand Heights Apartment - 3D/2D Parking Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Header & Top Navigation -->
+        <header id="game-header">
+            <div class="brand">
+                <span class="logo-icon">🏢🚗</span>
+                <h1>Grand Heights <span>Parking</span></h1>
+            </div>
+
+            <div class="top-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">LEVEL</span>
+                    <span id="level-display-num" class="stat-value">1</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">TIME</span>
+                    <span id="timer-display" class="stat-value">01:00</span>
+                </div>
+                <div class="stat-badge">
+                    <span class="stat-label">SCORE</span>
+                    <span id="score-display" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div class="top-actions">
+                <button id="btn-garage" class="icon-btn" title="Garage & Vehicle Select">
+                    <span>🚗</span> Garage
+                </button>
+                <button id="btn-levels" class="icon-btn" title="Select Level">
+                    <span>🗺️</span> Levels
+                </button>
+                <button id="btn-audio" class="icon-btn" title="Toggle Sound">
+                    <span id="audio-icon">🔊</span>
+                </button>
+                <button id="btn-restart" class="icon-btn danger" title="Restart Level">
+                    <span>🔄</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Viewport Canvas area -->
+        <main id="viewport-wrapper">
+            <canvas id="game-canvas" width="1000" height="650"></canvas>
+
+            <!-- On-Canvas HUD Overlay -->
+            <div id="canvas-hud">
+                <!-- Vehicle Health & Damage Bar -->
+                <div class="hud-box damage-box">
+                    <div class="hud-label">VEHICLE CONDITION</div>
+                    <div class="progress-bar-bg">
+                        <div id="damage-bar-fill" class="progress-fill health-100"></div>
+                    </div>
+                    <span id="damage-text">100% (0 Collisions)</span>
+                </div>
+
+                <!-- Alignment Gauge -->
+                <div class="hud-box alignment-box">
+                    <div class="hud-label">PARKING ALIGNMENT</div>
+                    <div class="alignment-meter">
+                        <div id="alignment-pointer" class="pointer"></div>
+                    </div>
+                    <span id="alignment-text">Out of Bay</span>
+                </div>
+
+                <!-- Speedometer & Gear Indicator -->
+                <div class="hud-box cockpit-box">
+                    <div class="gear-container">
+                        <span class="hud-label">GEAR</span>
+                        <div class="gear-selector">
+                            <button id="gear-drive" class="gear-btn active">D</button>
+                            <button id="gear-reverse" class="gear-btn">R</button>
+                        </div>
+                    </div>
+
+                    <div class="speedometer">
+                        <span id="speed-value">0</span>
+                        <span class="unit">KM/H</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Touch Controls Overlay -->
+            <div id="mobile-controls" class="mobile-only">
+                <div class="touch-left">
+                    <button id="touch-left-btn" class="touch-btn">◀</button>
+                    <button id="touch-right-btn" class="touch-btn">▶</button>
+                </div>
+                <div class="touch-right">
+                    <button id="touch-brake-btn" class="touch-btn brake-btn">STOP</button>
+                    <button id="touch-gas-btn" class="touch-btn gas-btn">GAS</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Keyboard Controls Helper Bar -->
+        <footer id="controls-bar">
+            <div class="key-hint">
+                <span class="key">W</span><span class="key">S</span> or <span class="key">▲</span><span class="key">▼</span> Accelerate / Brake
+            </div>
+            <div class="key-hint">
+                <span class="key">A</span><span class="key">D</span> or <span class="key">◀</span><span class="key">▶</span> Turn Steering
+            </div>
+            <div class="key-hint">
+                <span class="key">SPACE</span> Handbrake
+            </div>
+            <div class="key-hint">
+                <span class="key">R</span> Gear Toggle (Drive/Reverse)
+            </div>
+            <div class="key-hint">
+                <span class="key">H</span> Horn
+            </div>
+        </footer>
+    </div>
+
+    <!-- MODAL: Level Selection -->
+    <div id="modal-levels" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Apartment Complex Zones</h2>
+                <button class="close-btn" data-close="modal-levels">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="levels-grid" class="levels-grid">
+                    <!-- Dynamic level cards populated by js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Garage & Car Selection -->
+    <div id="modal-garage" class="modal hidden">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2>Apartment Resident Garage</h2>
+                <button class="close-btn" data-close="modal-garage">&times;</button>
+            </div>
+            <div class="modal-body garage-layout">
+                <div class="vehicle-preview">
+                    <div id="car-preview-canvas-container">
+                        <canvas id="garage-preview-canvas" width="280" height="180"></canvas>
+                    </div>
+                    <h3 id="selected-car-name">Compact Hatchback</h3>
+                    <div class="car-stats">
+                        <div class="stat-row">
+                            <span>Top Speed:</span>
+                            <div class="stat-bar"><div id="stat-speed" class="bar-fill" style="width: 60%"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span>Handling:</span>
+                            <div class="stat-bar"><div id="stat-handling" class="bar-fill" style="width: 85%"></div></div>
+                        </div>
+                        <div class="stat-row">
+                            <span>Durability:</span>
+                            <div class="stat-bar"><div id="stat-durability" class="bar-fill" style="width: 50%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="vehicle-picker">
+                    <h3>Select Vehicle</h3>
+                    <div id="car-list" class="car-list">
+                        <!-- Dynamic Car Options -->
+                    </div>
+
+                    <h3>Paint Color</h3>
+                    <div id="color-picker" class="color-picker">
+                        <button class="color-dot active" data-color="#e74c3c" style="background-color: #e74c3c;"></button>
+                        <button class="color-dot" data-color="#3498db" style="background-color: #3498db;"></button>
+                        <button class="color-dot" data-color="#2ecc71" style="background-color: #2ecc71;"></button>
+                        <button class="color-dot" data-color="#f1c40f" style="background-color: #f1c40f;"></button>
+                        <button class="color-dot" data-color="#9b59b6" style="background-color: #9b59b6;"></button>
+                        <button class="color-dot" data-color="#34495e" style="background-color: #34495e;"></button>
+                        <button class="color-dot" data-color="#ecf0f1" style="background-color: #ecf0f1;"></button>
+                    </div>
+
+                    <button id="btn-select-car" class="primary-btn full-width">Select Vehicle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Level Completion / Game Over Overlay -->
+    <div id="modal-result" class="modal hidden">
+        <div class="modal-content result-modal">
+            <div id="result-status-badge" class="result-badge success">PARKED PERFECTLY!</div>
+            <h2 id="result-title">Level Completed</h2>
+
+            <div class="stars-rating">
+                <span id="star-1" class="star">★</span>
+                <span id="star-2" class="star">★</span>
+                <span id="star-3" class="star">★</span>
+            </div>
+
+            <div class="result-details">
+                <div class="detail-row">
+                    <span>Time Taken:</span>
+                    <span id="result-time">00:24</span>
+                </div>
+                <div class="detail-row">
+                    <span>Collisions:</span>
+                    <span id="result-collisions">0</span>
+                </div>
+                <div class="detail-row">
+                    <span>Parking Accuracy:</span>
+                    <span id="result-accuracy">98%</span>
+                </div>
+                <div class="detail-row highlight">
+                    <span>Total Score:</span>
+                    <span id="result-score">2,450</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button id="btn-result-retry" class="secondary-btn">Retry Level</button>
+                <button id="btn-result-next" class="primary-btn">Next Level ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="audio.js"></script>
+    <script src="levels.js"></script>
+    <script src="car.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

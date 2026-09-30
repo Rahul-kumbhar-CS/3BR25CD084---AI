@@ -1,0 +1,13 @@
+ INFO  Accepting connections at http://localhost:8080
+ HTTP  9/30/2026 10:32:35 AM ::1 GET /
+ HTTP  9/30/2026 10:32:35 AM ::1 Returned 200 in 382 ms
+ HTTP  9/30/2026 10:32:36 AM ::1 GET /style.css
+ HTTP  9/30/2026 10:32:36 AM ::1 Returned 200 in 4 ms
+ HTTP  9/30/2026 10:32:36 AM ::1 GET /audio.js
+ HTTP  9/30/2026 10:32:36 AM ::1 GET /levels.js
+ HTTP  9/30/2026 10:32:36 AM ::1 GET /car.js
+ HTTP  9/30/2026 10:32:36 AM ::1 GET /game.js
+ HTTP  9/30/2026 10:32:36 AM ::1 Returned 200 in 9 ms
+ HTTP  9/30/2026 10:32:36 AM ::1 Returned 200 in 9 ms
+ HTTP  9/30/2026 10:32:36 AM ::1 Returned 200 in 8 ms
+ HTTP  9/30/2026 10:32:36 AM ::1 Returned 200 in 9 ms
